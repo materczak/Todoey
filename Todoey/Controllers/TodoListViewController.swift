@@ -10,18 +10,30 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
     
-    var itemArray = ["Kupic mleko", "Nakarmic dziecie", "Umyc zeby"]
+    var itemArray = [Item]()
     
     let defaltus = UserDefaults.standard
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+
+        let newItem = Item()
+        newItem.title = "Find Mike"
+        itemArray.append(newItem)
         
-        if let items = defaltus.array(forKey: "TodoListArray") as? [String] {
-            
+        let newItem2 = Item()
+        newItem2.title = "Buy Milk"
+        itemArray.append(newItem2)
+        
+        let newItem3 = Item()
+        newItem3.title = "Get bread"
+        itemArray.append(newItem3)
+        
+        if let items = defaltus.array(forKey: "TodoListArray") as? [Item] {
+
             itemArray = items
-            
+
         }
         
     }
@@ -35,29 +47,56 @@ class TodoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
+        let item = itemArray[indexPath.row]
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "TodoItemCell", for: indexPath)
         
-        cell.textLabel?.text = itemArray[indexPath.row]
+        cell.textLabel?.text = item.title
+        
+        //Ternary operator ==>
+        //value = condition ? valueIfTrue : valueIfFalse
+        
+//        if item.done == true {
+//            cell.accessoryType = .checkmark
+//        } else {
+//            cell.accessoryType = .none
+//        }
+
+        //next line replace 5 lines above
+        cell.accessoryType = item.done == true ? .checkmark : .none
+        
+        //tableView.reloadData()
         
         return cell
         
     }
     
-    //MARK: Delegate Method
+    //MARK: TableView Delegate Method
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        print(itemArray[indexPath.row])
+        print(itemArray[indexPath.row].title)
+
+//        if itemArray[indexPath.row].done == false {
+//            itemArray[indexPath.row].done = true
+//        } else {
+//            itemArray[indexPath.row].done = false
+//        }
         
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
-            
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-            
-        } else {
-            
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-            
-        }
+        //next line replace all the 5 lines above
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        
+        tableView.reloadData()
+        
+//        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
+//
+//            tableView.cellForRow(at: indexPath)?.accessoryType = .none
+//
+//        } else {
+//
+//            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
+//
+//        }
         
         tableView.deselectRow(at: indexPath, animated: true)
         
@@ -75,9 +114,13 @@ class TodoListViewController: UITableViewController {
             //what will happen once the user clicks the Add Item button on the UIAlert
             //print(textField.text)
             
-            self.itemArray.append(textField.text!)
+            let newItem = Item()
+            newItem.title = textField.text!
             
-            self.defaltus.set(self.itemArray, forKey: "TodoListArray")
+            self.itemArray.append(newItem)
+            
+            //self.defaltus.set(self.itemArray, forKey: "TodoListArray")
+            //nie dziala po zmianie rodzaju danych zapisywanych do array. uzyj tego linku zeby naprawic: https://stackoverflow.com/questions/41355427/attempt-to-insert-non-property-list-object-when-trying-to-save-a-custom-object-i
             
             self.tableView.reloadData()
             
