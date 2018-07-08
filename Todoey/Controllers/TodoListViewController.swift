@@ -12,29 +12,35 @@ class TodoListViewController: UITableViewController {
     
     var itemArray = [Item]()
     
-    let defaltus = UserDefaults.standard
+   //location for documentDirectory -> local storage available to the app only (sandbox)
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-
-        let newItem = Item()
-        newItem.title = "Find Mike"
-        itemArray.append(newItem)
         
-        let newItem2 = Item()
-        newItem2.title = "Buy Milk"
-        itemArray.append(newItem2)
+        print(dataFilePath)
         
-        let newItem3 = Item()
-        newItem3.title = "Get bread"
-        itemArray.append(newItem3)
+//        let newItem = Item()
+//        newItem.title = "Find Mike"
+//        itemArray.append(newItem)
+//
+//        let newItem2 = Item()
+//        newItem2.title = "Buy Milk"
+//        itemArray.append(newItem2)
+//
+//        let newItem3 = Item()
+//        newItem3.title = "Get bread"
+//        itemArray.append(newItem3)
         
-        if let items = defaltus.array(forKey: "TodoListArray") as? [Item] {
+        //we now loading items from the plist with this fuction below
+        loadItems()
+        
+        //if let items = defaltus.array(forKey: "TodoListArray") as? [Item] {
 
-            itemArray = items
+            //itemArray = items
 
-        }
+        //}
         
     }
 
@@ -53,7 +59,7 @@ class TodoListViewController: UITableViewController {
         
         cell.textLabel?.text = item.title
         
-        //Ternary operator ==>
+        //MARK: Ternary operator ==>
         //value = condition ? valueIfTrue : valueIfFalse
         
 //        if item.done == true {
@@ -75,7 +81,7 @@ class TodoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        print(itemArray[indexPath.row].title)
+        //print(itemArray[indexPath.row].title)
 
 //        if itemArray[indexPath.row].done == false {
 //            itemArray[indexPath.row].done = true
@@ -86,7 +92,10 @@ class TodoListViewController: UITableViewController {
         //next line replace all the 5 lines above
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
-        tableView.reloadData()
+        saveItems()
+        
+        //already added to saveItems method
+        //tableView.reloadData()
         
 //        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
 //
@@ -119,10 +128,7 @@ class TodoListViewController: UITableViewController {
             
             self.itemArray.append(newItem)
             
-            //self.defaltus.set(self.itemArray, forKey: "TodoListArray")
-            //nie dziala po zmianie rodzaju danych zapisywanych do array. uzyj tego linku zeby naprawic: https://stackoverflow.com/questions/41355427/attempt-to-insert-non-property-list-object-when-trying-to-save-a-custom-object-i
-            
-            self.tableView.reloadData()
+            self.saveItems()
             
         }
         
@@ -145,6 +151,39 @@ class TodoListViewController: UITableViewController {
         
     }
     
+    func saveItems() {
+        
+        let encoder = PropertyListEncoder()
+        
+        do {
+            let data = try encoder.encode(itemArray)
+            try data.write(to: dataFilePath!)
+        } catch {
+            print("Encoder encoding item array, \(error)")
+        }
+        
+        self.tableView.reloadData()
+        
+    }
+    
+    func loadItems() {
+        
+        if let data = try? Data(contentsOf: dataFilePath!) {
+             
+            let decoder = PropertyListDecoder()
+            
+            do {
+                itemArray = try decoder.decode([Item].self, from: data)
+            } catch {
+                print("Error decoding item arrach \(error)")
+            }
+        }
+        
+     
+        
+        
+        
+    }
     
 }
 
